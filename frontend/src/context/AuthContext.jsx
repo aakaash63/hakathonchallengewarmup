@@ -1,49 +1,43 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 
-const AuthContext = createContext(null);
+const Ctx = createContext(null);
 
-export const AuthProvider = ({ children }) => {
+export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('recoverease_token');
-    const storedUser = localStorage.getItem('recoverease_user');
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-    }
+    const token = localStorage.getItem('hg_token');
+    const stored = localStorage.getItem('hg_user');
+    if (token && stored) setUser(JSON.parse(stored));
     setLoading(false);
   }, []);
 
-  const loginUser = (authResponse) => {
-    localStorage.setItem('recoverease_token', authResponse.token);
-    localStorage.setItem('recoverease_user', JSON.stringify(authResponse));
-    setToken(authResponse.token);
-    setUser(authResponse);
+  const loginUser = data => {
+    localStorage.setItem('hg_token', data.token);
+    localStorage.setItem('hg_user', JSON.stringify(data));
+    setUser(data);
   };
 
   const logoutUser = () => {
-    localStorage.removeItem('recoverease_token');
-    localStorage.removeItem('recoverease_user');
-    setToken(null);
+    localStorage.removeItem('hg_token');
+    localStorage.removeItem('hg_user');
     setUser(null);
   };
 
-  const updateOnboarding = () => {
+  const completeOnboarding = () => {
     if (user) {
-      const updated = { ...user, onboardingComplete: true };
-      localStorage.setItem('recoverease_user', JSON.stringify(updated));
-      setUser(updated);
+      const u = { ...user, onboardingComplete: true };
+      localStorage.setItem('hg_user', JSON.stringify(u));
+      setUser(u);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, loginUser, logoutUser, updateOnboarding }}>
+    <Ctx.Provider value={{ user, loading, loginUser, logoutUser, completeOnboarding }}>
       {children}
-    </AuthContext.Provider>
+    </Ctx.Provider>
   );
-};
+}
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => useContext(Ctx);

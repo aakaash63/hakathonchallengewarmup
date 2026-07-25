@@ -3,22 +3,22 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navbar from './components/Navbar';
 
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import OnboardingPage from './pages/OnboardingPage';
-import DashboardPage from './pages/DashboardPage';
-import CrisisPage from './pages/CrisisPage';
-import CheckInPage from './pages/CheckInPage';
-import ScriptGeneratorPage from './pages/ScriptGeneratorPage';
-import CaregiverPage from './pages/CaregiverPage';
-import ResourcesPage from './pages/ResourcesPage';
-import SafetyPlanPage from './pages/SafetyPlanPage';
+import LoginPage        from './pages/LoginPage';
+import SignupPage       from './pages/SignupPage';
+import OnboardingPage   from './pages/OnboardingPage';
+import DashboardPage    from './pages/DashboardPage';
+import InterventionPage from './pages/InterventionPage';
+import MoodLogPage      from './pages/MoodLogPage';
+import ScriptPage       from './pages/ScriptPage';
+import FamilyPage       from './pages/FamilyPage';
+import ResourcesPage    from './pages/ResourcesPage';
+import SafetyPlanPage   from './pages/SafetyPlanPage';
 
-function AppLayout({ children }) {
+function Layout({ children }) {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50">
       <Navbar />
-      <main>{children}</main>
+      <main className="pb-20 md:pb-6">{children}</main>
     </div>
   );
 }
@@ -27,57 +27,21 @@ function AppRoutes() {
   const { user } = useAuth();
   return (
     <Routes>
-      {/* Public */}
-      <Route path="/login" element={<LoginPage />} />
+      <Route path="/login"  element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
 
-      {/* Onboarding (protected) */}
-      <Route path="/onboarding" element={
-        <ProtectedRoute>
-          <OnboardingPage />
-        </ProtectedRoute>
-      } />
+      <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
 
-      {/* Protected with nav */}
-      <Route path="/dashboard" element={
-        <ProtectedRoute>
-          <AppLayout><DashboardPage /></AppLayout>
-        </ProtectedRoute>
-      } />
-      <Route path="/crisis" element={
-        <ProtectedRoute>
-          <AppLayout><CrisisPage /></AppLayout>
-        </ProtectedRoute>
-      } />
-      <Route path="/checkin" element={
-        <ProtectedRoute>
-          <AppLayout><CheckInPage /></AppLayout>
-        </ProtectedRoute>
-      } />
-      <Route path="/scripts" element={
-        <ProtectedRoute>
-          <AppLayout><ScriptGeneratorPage /></AppLayout>
-        </ProtectedRoute>
-      } />
-      <Route path="/caregiver" element={
-        <ProtectedRoute>
-          <AppLayout><CaregiverPage /></AppLayout>
-        </ProtectedRoute>
-      } />
-      <Route path="/resources" element={
-        <ProtectedRoute>
-          <AppLayout><ResourcesPage /></AppLayout>
-        </ProtectedRoute>
-      } />
-      <Route path="/safety-plan" element={
-        <ProtectedRoute>
-          <AppLayout><SafetyPlanPage /></AppLayout>
-        </ProtectedRoute>
-      } />
+      <Route path="/dashboard"    element={<ProtectedRoute><Layout><DashboardPage /></Layout></ProtectedRoute>} />
+      <Route path="/intervention" element={<ProtectedRoute><Layout><InterventionPage /></Layout></ProtectedRoute>} />
+      <Route path="/moodlog"      element={<ProtectedRoute><Layout><MoodLogPage /></Layout></ProtectedRoute>} />
+      <Route path="/scripts"      element={<ProtectedRoute><Layout><ScriptPage /></Layout></ProtectedRoute>} />
+      <Route path="/family"       element={<ProtectedRoute><Layout><FamilyPage /></Layout></ProtectedRoute>} />
+      <Route path="/resources"    element={<ProtectedRoute><Layout><ResourcesPage /></Layout></ProtectedRoute>} />
+      <Route path="/safety-plan"  element={<ProtectedRoute><Layout><SafetyPlanPage /></Layout></ProtectedRoute>} />
 
-      {/* Default */}
-      <Route path="/" element={<Navigate to={user ? "/dashboard" : "/login"} replace />} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="/"  element={<Navigate to={user ? '/dashboard' : '/login'} replace />} />
+      <Route path="*"  element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 }

@@ -1,31 +1,28 @@
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
+const BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
-const axiosInstance = axios.create({
-  baseURL: API_BASE,
+const api = axios.create({
+  baseURL: BASE,
   timeout: 30000,
   headers: { 'Content-Type': 'application/json' },
 });
 
-// Attach JWT automatically
-axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem('recoverease_token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
+api.interceptors.request.use(cfg => {
+  const token = localStorage.getItem('hg_token');
+  if (token) cfg.headers.Authorization = `Bearer ${token}`;
+  return cfg;
 });
 
-// Handle 401
-axiosInstance.interceptors.response.use(
-  (res) => res,
-  (err) => {
+api.interceptors.response.use(
+  r => r,
+  err => {
     if (err.response?.status === 401) {
-      localStorage.removeItem('recoverease_token');
-      localStorage.removeItem('recoverease_user');
+      localStorage.clear();
       window.location.href = '/login';
     }
     return Promise.reject(err);
   }
 );
 
-export default axiosInstance;
+export default api;

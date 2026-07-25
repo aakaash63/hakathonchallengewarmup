@@ -1,119 +1,110 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getCheckInHistory } from '../api/checkinApi';
+import { getMoodHistory } from '../api/moodApi';
 
-const RISK_COLORS = {
-  LOW: 'bg-green-100 text-green-700 border-green-200',
-  MEDIUM: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-  HIGH: 'bg-red-100 text-red-700 border-red-200',
-};
+const RISK_STYLE = { LOW: 'risk-LOW', MEDIUM: 'risk-MEDIUM', HIGH: 'risk-HIGH' };
+
+const IND_TOOLS = [
+  { to: '/moodlog',   icon: '📋', label: 'Mood Log',         desc: 'Track your daily wellbeing',   color: 'bg-blue-50  border-blue-200  hover:bg-blue-100'   },
+  { to: '/scripts',   icon: '📝', label: 'Support Scripts',  desc: 'AI-personalized scripts',      color: 'bg-violet-50 border-violet-200 hover:bg-violet-100' },
+  { to: '/resources', icon: '📚', label: 'Learn & Explore',  desc: 'Trusted recovery resources',   color: 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100' },
+  { to: '/safety-plan',icon:'🛡️', label: 'Safety Plan',      desc: 'Your personal recovery plan',  color: 'bg-amber-50  border-amber-200  hover:bg-amber-100'  },
+];
+
+const FAM_TOOLS = [
+  { to: '/family',    icon: '🤝', label: 'Family Guidance',  desc: 'AI support for caregivers',    color: 'bg-blue-50  border-blue-200  hover:bg-blue-100'   },
+  { to: '/resources', icon: '📚', label: 'Learn & Explore',  desc: 'Recovery education hub',       color: 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100' },
+  { to: '/safety-plan',icon:'🛡️', label: 'Safety Plan',      desc: 'Emergency resources & contacts',color:'bg-amber-50  border-amber-200  hover:bg-amber-100'  },
+];
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const [latestCheckin, setLatestCheckin] = useState(null);
+  const [latestLog, setLatestLog] = useState(null);
+  const isFamily = user?.role === 'FAMILY';
+  const tools = isFamily ? FAM_TOOLS : IND_TOOLS;
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
   useEffect(() => {
-    getCheckInHistory().then(res => {
-      if (res.data?.length > 0) setLatestCheckin(res.data[0]);
-    }).catch(() => {});
-  }, []);
-
-  const isCaregiver = user?.role === 'CAREGIVER';
-
-  const individualActions = [
-    { to: '/crisis', icon: '🆘', label: 'Help Me Now', desc: 'Immediate AI crisis support', color: 'bg-red-50 border-red-200 hover:bg-red-100' },
-    { to: '/checkin', icon: '📋', label: 'Daily Check-in', desc: 'Track mood & cravings', color: 'bg-blue-50 border-blue-200 hover:bg-blue-100' },
-    { to: '/scripts', icon: '📝', label: 'Emergency Scripts', desc: 'AI-generated support scripts', color: 'bg-purple-50 border-purple-200 hover:bg-purple-100' },
-    { to: '/resources', icon: '📚', label: 'Resources & Education', desc: 'Trusted recovery info', color: 'bg-green-50 border-green-200 hover:bg-green-100' },
-    { to: '/safety-plan', icon: '🛡️', label: 'Safety Plan', desc: 'Your emergency contacts & tools', color: 'bg-yellow-50 border-yellow-200 hover:bg-yellow-100' },
-  ];
-
-  const caregiverActions = [
-    { to: '/caregiver', icon: '🤝', label: 'Caregiver Guidance', desc: 'AI support for your situation', color: 'bg-blue-50 border-blue-200 hover:bg-blue-100' },
-    { to: '/resources', icon: '📚', label: 'Resources & Education', desc: 'Trusted recovery info', color: 'bg-green-50 border-green-200 hover:bg-green-100' },
-  ];
-
-  const actions = isCaregiver ? caregiverActions : individualActions;
-
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+    if (!isFamily) getMoodHistory().then(r => r.data?.length && setLatestLog(r.data[0])).catch(() => {});
+  }, [isFamily]);
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20 md:pb-6">
-      <div className="max-w-2xl mx-auto px-4 py-6">
+    <div className="max-w-2xl mx-auto px-4 py-6">
+      {/* Greeting */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">{greet}, {user?.name?.split(' ')[0]} 👋</h1>
+        <p className="text-gray-400 text-sm mt-1">
+          {isFamily ? "Your support makes a real difference today." : "You chose recovery today — that matters."}
+        </p>
+      </div>
 
-        {/* Greeting */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">
-            {greeting}, {user?.name?.split(' ')[0]} 👋
-          </h1>
-          <p className="text-gray-500 mt-1 text-sm">
-            {isCaregiver
-              ? "You're making a difference by being here. How can we support you today?"
-              : "You're not alone. Every day in recovery is a victory."}
-          </p>
-        </div>
-
-        {/* Latest check-in risk banner */}
-        {latestCheckin && !isCaregiver && (
-          <div className={`border rounded-2xl px-5 py-4 mb-5 ${RISK_COLORS[latestCheckin.riskLevel] || RISK_COLORS.LOW}`}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide opacity-70">Latest Check-in Risk</p>
-                <p className="text-lg font-bold">{latestCheckin.riskLevel} Risk</p>
-                <p className="text-sm opacity-80">{latestCheckin.aiSummary?.split('.')[0]}.</p>
-              </div>
-              <Link to="/checkin" className="text-xs font-medium underline opacity-70">Check in now →</Link>
-            </div>
-          </div>
-        )}
-
-        {/* Emergency banner if no check-in */}
-        {!latestCheckin && !isCaregiver && (
-          <div className="bg-primary-50 border border-primary-200 rounded-2xl px-5 py-4 mb-5">
-            <p className="text-primary-700 font-medium text-sm">🌿 Welcome! Start with a daily check-in to track your progress.</p>
-          </div>
-        )}
-
-        {/* Main CTA for individuals */}
-        {!isCaregiver && (
-          <Link to="/crisis"
-            className="w-full bg-red-500 hover:bg-red-600 text-white rounded-2xl px-6 py-5 flex items-center gap-4 shadow-md hover:shadow-lg transition-all duration-200 mb-6 group">
-            <span className="text-4xl group-hover:scale-110 transition-transform">🆘</span>
+      {/* Risk banner */}
+      {latestLog && (
+        <div className={`border-2 rounded-3xl px-5 py-4 mb-5 ${RISK_STYLE[latestLog.riskLevel]}`}>
+          <div className="flex justify-between items-center">
             <div>
-              <p className="font-bold text-lg">Need Help Right Now?</p>
-              <p className="text-red-100 text-sm">Tap for immediate AI crisis support with voice</p>
+              <p className="text-xs font-bold uppercase tracking-wide opacity-60">Latest Mood Log</p>
+              <p className="text-lg font-bold">{latestLog.riskLevel} Risk</p>
+              <p className="text-sm opacity-75">{latestLog.aiSummary?.split('.')[0]}.</p>
             </div>
-            <span className="ml-auto text-2xl">→</span>
+            <Link to="/moodlog" className="text-xs underline opacity-60 font-medium">Log now →</Link>
+          </div>
+        </div>
+      )}
+
+      {!latestLog && !isFamily && (
+        <div className="bg-hope-50 border border-hope-200 rounded-3xl px-5 py-4 mb-5">
+          <p className="text-hope-700 font-medium text-sm">🌿 Start with a mood log to personalize your experience.</p>
+        </div>
+      )}
+
+      {/* Primary CTA */}
+      {!isFamily && (
+        <Link to="/intervention"
+          className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-3xl px-6 py-5 flex items-center gap-4 shadow-lg hover:shadow-xl transition-all duration-200 mb-6 group">
+          <span className="text-4xl group-hover:scale-110 transition-transform">🆘</span>
+          <div>
+            <p className="font-bold text-lg">Need Immediate Help?</p>
+            <p className="text-red-100 text-sm">Voice-powered AI intervention — zero typing needed</p>
+          </div>
+          <span className="ml-auto text-2xl">→</span>
+        </Link>
+      )}
+      {isFamily && (
+        <Link to="/family"
+          className="w-full bg-gradient-to-r from-calm-500 to-calm-600 hover:from-calm-600 hover:to-calm-700 text-white rounded-3xl px-6 py-5 flex items-center gap-4 shadow-lg hover:shadow-xl transition-all duration-200 mb-6 group">
+          <span className="text-4xl group-hover:scale-110 transition-transform">🤝</span>
+          <div>
+            <p className="font-bold text-lg">Get Guidance Now</p>
+            <p className="text-calm-100 text-sm">AI-powered family and caregiver support</p>
+          </div>
+          <span className="ml-auto text-2xl">→</span>
+        </Link>
+      )}
+
+      {/* Tools grid */}
+      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Your Tools</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {tools.map(t => (
+          <Link key={t.to} to={t.to}
+            className={`border rounded-3xl p-5 flex items-start gap-4 transition-all duration-200 hover:shadow-md ${t.color}`}>
+            <span className="text-3xl">{t.icon}</span>
+            <div>
+              <p className="font-semibold text-gray-800">{t.label}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{t.desc}</p>
+            </div>
           </Link>
-        )}
+        ))}
+      </div>
 
-        {/* Action grid */}
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-          {isCaregiver ? 'Caregiver Tools' : 'Your Tools'}
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {actions.filter(a => a.to !== '/crisis').map(action => (
-            <Link key={action.to} to={action.to}
-              className={`border rounded-2xl p-5 flex items-start gap-4 transition-all duration-200 hover:shadow-md ${action.color}`}
-              aria-label={action.label}>
-              <span className="text-3xl">{action.icon}</span>
-              <div>
-                <p className="font-semibold text-gray-800">{action.label}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{action.desc}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        {/* Safety reminder */}
-        <div className="mt-8 bg-gray-100 rounded-2xl p-4 text-center">
-          <p className="text-xs text-gray-400">
-            🛡️ RecoverEase AI provides supportive guidance only. For medical emergencies, call <strong>911</strong>.
-            <br />National Helpline: <strong>1-800-662-4357</strong> (SAMHSA)
-          </p>
-        </div>
+      {/* Footer note */}
+      <div className="mt-8 bg-gray-100 rounded-3xl p-4 text-center">
+        <p className="text-xs text-gray-400">
+          🛡️ Supportive guidance only — not medical advice.
+          Emergencies: <strong>911</strong> | SAMHSA: <strong>1-800-662-4357</strong>
+        </p>
       </div>
     </div>
   );

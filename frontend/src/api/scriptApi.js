@@ -1,4 +1,3 @@
-import axiosInstance from './axiosInstance';
-
-export const generateScript = (data) => axiosInstance.post('/api/scripts/generate', data);
-export const getScriptHistory = () => axiosInstance.get('/api/scripts/history');
+import api from './axiosInstance';
+export const generateScript = data => api.post('/api/scripts/generate', data);
+export const getScriptHistory = ()  => api.get('/api/scripts/history');

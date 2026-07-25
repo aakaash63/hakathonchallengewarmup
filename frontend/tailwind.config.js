@@ -1,41 +1,21 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#f0fdf4',
-          100: '#dcfce7',
-          200: '#bbf7d0',
-          300: '#86efac',
-          400: '#4ade80',
-          500: '#22c55e',
-          600: '#16a34a',
-          700: '#15803d',
-          800: '#166534',
-          900: '#14532d',
+        hope: {
+          50: '#f0f9f4', 100: '#dcf0e6', 200: '#bbdecf', 300: '#8dc4ae',
+          400: '#5da38c', 500: '#3d8870', 600: '#2e6e5a', 700: '#265849',
+          800: '#214739', 900: '#1c3c30',
         },
         calm: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
+          50: '#f0f4ff', 100: '#e0eaff', 200: '#c7d7fe', 300: '#a5bbfc',
+          400: '#8098f9', 500: '#6172f3', 600: '#444ce7', 700: '#3538cd',
+          800: '#2d31a6', 900: '#2d3282',
         },
-        crisis: {
-          low: '#22c55e',
-          medium: '#f59e0b',
-          high: '#ef4444',
-        }
       },
-      animation: {
-        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'bounce-slow': 'bounce 2s infinite',
-      }
     },
   },
   plugins: [],
-}
+};
